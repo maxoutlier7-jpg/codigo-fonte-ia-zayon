@@ -10,9 +10,20 @@ import { ClockPanel, CommandsPanel, SystemsPanel } from './hud-panels'
 import { MessageList } from './message-list'
 import { CommandInput } from './command-input'
 import { cn } from '@/lib/utils'
+import { DEFAULT_MODEL_ID } from '@/lib/models'
+import { ModelSelect } from './model-select'
+
+function readError(message: string) {
+  try {
+    return (JSON.parse(message) as { error?: string }).error ?? message
+  } catch {
+    return message
+  }
+}
 
 export function ZayonInterface() {
   const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID)
   const voiceEnabledRef = useRef(voiceEnabled)
   const { speaking, speak, cancel } = useSpeechSynthesis()
 
@@ -36,9 +47,9 @@ export function ZayonInterface() {
   const send = useCallback(
     (text: string) => {
       cancel()
-      sendMessage({ text })
+      sendMessage({ text }, { body: { model: modelId } })
     },
-    [cancel, sendMessage],
+    [cancel, sendMessage, modelId],
   )
 
   const recognition = useSpeechRecognition(send)
@@ -72,6 +83,7 @@ export function ZayonInterface() {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          <ModelSelect value={modelId} onChange={setModelId} disabled={busy} />
           <button
             type="button"
             onClick={() => {
@@ -132,7 +144,7 @@ export function ZayonInterface() {
 
           {error && (
             <p className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-              {error.message || 'Falha na conexão com o núcleo. Tente novamente.'}
+              {readError(error.message) || 'Falha na conexão com o núcleo. Tente novamente.'}
             </p>
           )}
 
