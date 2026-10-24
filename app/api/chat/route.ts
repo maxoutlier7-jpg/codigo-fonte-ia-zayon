@@ -49,6 +49,9 @@ export async function POST(req: Request) {
         if (/credit card/i.test(message)) {
           return 'O AI Gateway da Vercel exige um cartão de crédito cadastrado para liberar os créditos gratuitos. Adicione um cartão em vercel.com → AI Gateway e tente novamente.'
         }
+        if (/authentication|unauthorized|401|user not found/i.test(message)) {
+          return 'A chave do OpenRouter é inválida. Gere uma nova em openrouter.ai/keys (ela começa com "sk-or-v1-") e atualize OPENROUTER_API_KEY em Vars.'
+        }
         if (/rate limit|429/i.test(message)) {
           return 'Este modelo gratuito está congestionado no momento. Escolha outro modelo no seletor e tente novamente.'
         }
