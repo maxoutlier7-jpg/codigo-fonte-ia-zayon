@@ -20,15 +20,16 @@ Use markdown apenas quando ajudar (listas, código).
 Use as ferramentas disponíveis sempre que forem úteis: clima, data/hora, pesquisa de conhecimento
 e abertura de sites. Nunca invente dados que uma ferramenta poderia fornecer.`
 
-const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
+const openRouterApiKey = process.env.OPENROUTER_API_KEY_2
+const openrouter = createOpenRouter({ apiKey: openRouterApiKey })
 
 export async function POST(req: Request) {
   const { messages, model: modelId }: { messages: ZayonUIMessage[]; model?: string } = await req.json()
   const selected = findModel(modelId)
 
-  if (selected.provider === 'openrouter' && !process.env.OPENROUTER_API_KEY) {
+  if (selected.provider === 'openrouter' && !openRouterApiKey) {
     return Response.json(
-      { error: 'Configure a variável OPENROUTER_API_KEY (gratuita em openrouter.ai/keys) para usar este modelo.' },
+      { error: 'Configure a variável OPENROUTER_API_KEY_2 (gratuita em openrouter.ai/keys) para usar este modelo.' },
       { status: 400 },
     )
   }
@@ -50,7 +51,10 @@ export async function POST(req: Request) {
           return 'O AI Gateway da Vercel exige um cartão de crédito cadastrado para liberar os créditos gratuitos. Adicione um cartão em vercel.com → AI Gateway e tente novamente.'
         }
         if (/authentication|unauthorized|401|user not found/i.test(message)) {
-          return 'A chave do OpenRouter é inválida. Gere uma nova em openrouter.ai/keys (ela começa com "sk-or-v1-") e atualize OPENROUTER_API_KEY em Vars.'
+          return 'A chave do OpenRouter é inválida. Gere uma nova em openrouter.ai/keys (ela começa com "sk-or-v1-") e atualize OPENROUTER_API_KEY_2 em Vars.'
+        }
+        if (/not found|404/i.test(message)) {
+          return 'Este modelo está indisponível no provedor agora. Escolha outro modelo no seletor.'
         }
         if (/rate limit|429/i.test(message)) {
           return 'Este modelo gratuito está congestionado no momento. Escolha outro modelo no seletor e tente novamente.'
